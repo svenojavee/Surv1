@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1536757430783.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "EBC7EC5C",
+    "lastKnownWriteTime" : 1536757451,
+    "last_content_update" : 1536757451922,
+    "path" : "~/Desktop/Surv1/Important.R",
+    "project_path" : "Important.R",
+    "properties" : {
+        "cursorPosition" : "1,8",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
