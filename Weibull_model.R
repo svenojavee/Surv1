@@ -11,7 +11,8 @@ N <- 100
 #Generate some survival data using one covariate beta
 
 #Effect sizes (arbitrary)
-betas <- rnorm(10,0,1)
+betas <- rnorm(50,0,1)
+betas2 <- rnorm(10,0,2)
 alfa <- 5
 mu <- -10
 
@@ -260,3 +261,5 @@ for(i in 1:n){
   #print(paste0(i,": Alfa is ",new_alfa,". Beta is ",new_beta))
   res_matrix[i,] <- c(alfa,mu,BETA,sigma2)
 }
+
+
