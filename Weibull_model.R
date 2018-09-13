@@ -12,7 +12,7 @@ N <- 100
 
 #Effect sizes (arbitrary)
 betas <- rnorm(50,0,1)
-betas2 <- rnorm(10,0,2)
+
 alfa <- 5
 mu <- -10
 
@@ -211,7 +211,7 @@ abscissae_setter <- function(alfa,beta,mu,sigma2){
 
 #Construct a sampler doing sampling one by one from the distributions--------------------------------
 #Fix the sample size
-n <- 200
+n <- 1000
 
 #Prior values for alfa
 alfa0 <- 6
@@ -230,25 +230,46 @@ sigma_mu <- 10 #Just fix some big value
 
 #Set some starting values
 BETA <- rep(0,length(betas))
-alfa <- 3
-mu <- 0
+alfa <- 5
+mu <- -10
+pi <- 0.1   #Needs to be thought about
 
 res_matrix <- matrix(rep(NA,(length(betas)+3)*n),ncol=length(betas)+3)
 abscissae_set <- abscissae_setter(alfa,BETA,mu,sigma2)
 t1 <- Sys.time()
+
+#First values for BETA
+for(ind in 1:length(BETA)){
+  new_beta <- ars(1,function(w) f_beta_vec(w,alfa,mu,ind),function(w) f_beta_derivative_vec(w,alfa,mu,ind),x=abscissae_set$beta[,ind],m=5)
+  BETA[ind] <- new_beta
+}
+
 for(i in 1:n){
   alfa <- ars(1,function(w) f_alfa_vec(w,mu,BETA),function(w) f_alfa_derivative_vec(w,mu,BETA),x=abscissae_set$alfa,m=5,lb=T,xlb=0)
-  print(i)
+  #print(i)
   mu <- ars(1,function(w) f_mu_vec(w,alfa,BETA),function(w) f_mu_derivative_vec(w,alfa,BETA),x=abscissae_set$mu,m=5)
+  
+  #Compare the likelihoods for spike and slab
+  for(ind in 1:length(BETA)){
+    l_spike <- log(pi) - sum(exp(mu+(X[,-ind] %*% (BETA[-ind])))*(data_set$y ** alfa) ) - 1/(2*sigma2) * BETA[-ind] %*% BETA[-ind]
+    l_slab <- log(1-pi) + sum(data_set$failure*X[,ind] * BETA[ind] ) - sum(exp(mu+(X %*% (BETA)))*(data_set$y ** alfa) ) - 1/(2*sigma2) * BETA %*% BETA
+    
+    pi <- 1/(exp(l_slab-l_spike)+1)
+    
+    BETA[ind] <- BETA[ind] * (pi>runif(1))
+  }
+  
+  
   for(ind in 1:length(BETA)){
     #abscissae_set <- abscissae_setter(alfa,BETA,z)
     #print(ind)
-    new_beta <- ars(1,function(w) f_beta_vec(w,alfa,mu,ind),function(w) f_beta_derivative_vec(w,alfa,mu,ind),x=abscissae_set$beta[,ind],m=5)
-    BETA[ind] <- new_beta
-    
+    if(BETA[ind] != 0){
+      new_beta <- ars(1,function(w) f_beta_vec(w,alfa,mu,ind),function(w) f_beta_derivative_vec(w,alfa,mu,ind),x=abscissae_set$beta[,ind],m=5)
+      BETA[ind] <- new_beta
+    }
   }
-  #Calculate new sigma2 value
-  sigma2 <- rinvgamma(1,shape=sigma_alfa+0.5*length(betas),scale=1/(0.5* sum(BETA**2)+sigma_beta))  
+  #Calculate new sigma2 value (using only the non 0)
+  sigma2 <- rinvgamma(1,shape=sigma_alfa+0.5*length(betas[BETA!=0]),scale=1/(0.5* sum(BETA[BETA!=0]**2)+sigma_beta))  
   
   #Use abscissae finder only for some time
   if(i<20){
@@ -261,5 +282,11 @@ for(i in 1:n){
   #print(paste0(i,": Alfa is ",new_alfa,". Beta is ",new_beta))
   res_matrix[i,] <- c(alfa,mu,BETA,sigma2)
 }
+print(Sys.time()-t1)
 
+hist(res_matrix[900:1000,2])
+
+View(res_matrix[900:1000,])
+
+plot(res_matrix[9:1000,6])
 
