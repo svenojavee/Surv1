@@ -107,6 +107,30 @@ f_mu_derivative_vec <- function(mu,alfa_use,beta_use){
   return(unlist(lapply(mu,function(x) f_mu_derivative(x,alfa_use,beta_use))))
 }
 
+#Log lambda densities and first derivative-----------------------------------
+#Ind denotes a subject in the sample (not the SNP)
+
+f_lambda <- function(lambda,ind,alfa,sigma2,gamma_vec,beta){
+  return(sum(data_set$failure)*log(alfa) + data_set$failure[ind]*lambda+
+           data_set$failure[ind]*(alfa-1)*log(data_set$time_in_research[ind])-
+           exp(lambda)*data_set$time_in_research[i]**alfa +
+           log(1/sqrt(sigma2)) -1/(2*sigma2)*(lambda-X[ind,gamma_vec] %*% beta[gamma_vec])**2)
+}
+
+f_lambda_derivative <- function(lambda,ind,alfa,sigma2,gamma_vec,beta){
+  return(data_set$failure[ind]-
+           exp(lambda)*data_set$time_in_research[i]**alfa +
+           -1/(2*sigma2)*2*(lambda-X[ind,gamma_vec] %*% beta[gamma_vec]))
+}
+
+f_lambda_vec <- function(lambda,ind,alfa,sigma2,gamma_vec,beta){
+  return(unlist(lapply(lambda,function(w) f_lambda(w,ind,alfa,sigma2,gamma_vec,beta) )))
+}
+f_lambda_derivative_vec <- function(lambda,ind,alfa,sigma2,gamma_vec,beta){
+  return(unlist(lapply(lambda,function(w) f_lambda_derivative(w,ind,alfa,sigma2,gamma_vec,beta) )))
+}
+
+
 
 #Calculating the modes for ARS---------------------------------------
 
